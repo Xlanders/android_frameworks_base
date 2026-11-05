@@ -1635,9 +1635,9 @@ private fun rememberQsBrightnessSettings(): QsBrightnessSettings {
         val position = runCatching {
             LineageSettings.Secure.getIntForUser(
                 cr, LineageSettings.Secure.QS_BRIGHTNESS_SLIDER_POSITION,
-                0, UserHandle.USER_CURRENT
+                1, UserHandle.USER_CURRENT
             )
-        }.getOrElse { 0 }
+        }.getOrElse { 1 }
 
         val showSliderValue = runCatching {
             LineageSettings.Secure.getIntForUser(
