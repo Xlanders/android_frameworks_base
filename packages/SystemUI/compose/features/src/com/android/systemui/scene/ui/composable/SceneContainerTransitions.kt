@@ -36,6 +36,7 @@ import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSet
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsSceneTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeSceneTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToSplitShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.notificationsShadeToQuickSettingsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.toBouncerTransition
 import com.android.systemui.scene.ui.composable.transitions.toNotificationsShadeTransition
@@ -235,6 +236,9 @@ class SceneContainerTransitions : SceneContainerTransitionsBuilder {
                     shadeExpansionMotion = shadeExpansionMotion,
                     revealHaptics = revealHaptics,
                 )
+            }
+            from(Overlays.NotificationsShade, to = Overlays.QuickSettingsShade) {
+                notificationsShadeToQuickSettingsShadeTransition()
             }
             from(
                 Scenes.Gone,
