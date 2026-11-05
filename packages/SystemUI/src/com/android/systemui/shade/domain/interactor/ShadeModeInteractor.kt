@@ -160,7 +160,7 @@ constructor(
         private const val TAG = "ShadeModeInteractorImpl"
 
         /* Whether the Dual Shade setting is enabled by default. */
-        private const val DUAL_SHADE_ENABLED_DEFAULT = false
+        private const val DUAL_SHADE_ENABLED_DEFAULT = true
     }
 }
 
