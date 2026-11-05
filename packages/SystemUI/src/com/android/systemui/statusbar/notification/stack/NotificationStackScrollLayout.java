@@ -204,6 +204,8 @@ public class NotificationStackScrollLayout
 
     private Runnable mFinishScrollingCallback;
     private int mTouchSlop;
+    /** Whether the current gesture started on a notification, which handles horizontal swipes. */
+    private boolean mDownOnNotificationRow;
     private float mSlopMultiplier;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
@@ -4567,6 +4569,12 @@ public class NotificationStackScrollLayout
                     mDownX = x;
                     initVelocityTrackerIfNotExists();
                     mVelocityTracker.addMovement(ev);
+                } else if (SceneContainerFlag.isEnabled() && !mDownOnNotificationRow
+                        && xDiff > getTouchSlop(ev) && xDiff > yDiff) {
+                    // Horizontal drags on notifications dismiss them. Elsewhere (section
+                    // headers, footer, gaps), let the scene container use them, for example to
+                    // move to the quick settings panel in dual shade.
+                    setIsBeingDragged(true);
                 }
                 break;
             }
@@ -4577,9 +4585,17 @@ public class NotificationStackScrollLayout
                 final ExpandableView childAtTouchPos = getChildAtPosition(
                         ev.getX(), y, false /* requireMinHeight */,
                         false /* ignoreDecors */, true /* ignoreWidth */);
+                mDownOnNotificationRow = childAtTouchPos instanceof ExpandableNotificationRow;
                 if (childAtTouchPos == null) {
                     setIsBeingDragged(false);
                     recycleVelocityTracker();
+                    if (SceneContainerFlag.isEnabled()) {
+                        // Track the gesture anyway, so that a horizontal drag in the gaps
+                        // between notifications can be handed over to the scene container.
+                        mLastMotionY = y;
+                        mDownX = (int) ev.getX();
+                        mActivePointerId = ev.getPointerId(0);
+                    }
                     break;
                 }
 
