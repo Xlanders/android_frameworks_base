@@ -14,6 +14,7 @@
 
 package com.android.systemui.keyguard.ui.composable.elements
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -54,6 +55,10 @@ constructor(
         val element = elements[key]
         if (element == null) {
             logger.e({ "No lockscreen element available at key: $str1" }) { str1 = "$key" }
+            // Still emit an empty node: layouts such as LockscreenSceneLayout expect one
+            // measurable per requested key, and crash when an optional element (for example the
+            // ambient indication area, absent on AOSP) is missing.
+            Box(modifier)
             return
         }
 
