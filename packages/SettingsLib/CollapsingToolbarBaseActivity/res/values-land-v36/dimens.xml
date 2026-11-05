@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 The LineageOS Project
+  SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- Keep the regular height in landscape, where vertical space is scarce. -->
+    <dimen name="settingslib_expressive_toolbar_layout_height">@dimen/settingslib_toolbar_layout_height</dimen>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 The LineageOS Project
+  SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- Expressive collapsing toolbar: expanded header fills about a third of the screen so that
+         the first preferences start within thumb reach. -->
+    <dimen name="settingslib_expressive_toolbar_layout_height">300dp</dimen>
+</resources>

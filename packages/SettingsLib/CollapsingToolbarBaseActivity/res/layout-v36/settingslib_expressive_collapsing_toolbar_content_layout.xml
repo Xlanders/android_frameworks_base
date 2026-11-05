@@ -27,13 +27,13 @@
         android:outlineSpotShadowColor="@android:color/transparent"
         android:background="@android:color/transparent"
         android:touchscreenBlocksFocus="false"
-        app:expanded="false"
+        app:expanded="true"
         android:theme="@style/SettingsLibTheme.CollapsingToolbar.Expressive">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/settingslib_toolbar_layout_height"
+            android:layout_height="@dimen/settingslib_expressive_toolbar_layout_height"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:toolbarId="@id/action_bar"
             app:maxLines="2"
