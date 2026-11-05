@@ -29,8 +29,8 @@
       android:orientation="vertical"
       android:clipChildren="false"
       android:clipToPadding="false"
+      android:layout_marginBottom="@dimen/global_actions_lite_bottom_margin"
       app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       android:layout_weight="1">
