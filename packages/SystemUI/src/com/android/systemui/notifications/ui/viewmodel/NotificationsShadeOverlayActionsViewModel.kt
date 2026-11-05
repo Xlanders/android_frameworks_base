@@ -50,6 +50,8 @@ constructor(private val shadeModeInteractor: ShadeModeInteractor) : UserActionsV
                 buildMap {
                     put(Swipe.Up, hideNotificationsShade)
                     put(Back, hideNotificationsShade)
+                    // Quick settings sit on the end side: swipe towards the start to get them.
+                    put(Swipe.Start, openQuickSettingsShade)
                     if (!isFullWidthShade) {
                         put(Swipe.Down(fromSource = EndHalf), openQuickSettingsShade)
                     }

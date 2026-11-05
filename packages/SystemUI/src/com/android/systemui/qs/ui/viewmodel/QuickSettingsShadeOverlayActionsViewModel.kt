@@ -60,6 +60,8 @@ constructor(
                     } else {
                         put(Back, hideQuickSettings)
                         put(Swipe.Up, hideQuickSettings)
+                        // Notifications sit on the start side: swipe towards the end to get them.
+                        put(Swipe.End, openNotificationsShade)
                     }
                     put(Swipe.Down(fromSource = TopEdgeStartHalf), openNotificationsShade)
                     if (!isFullWidthShade) {
