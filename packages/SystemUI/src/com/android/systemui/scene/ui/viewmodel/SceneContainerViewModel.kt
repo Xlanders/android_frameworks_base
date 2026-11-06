@@ -302,7 +302,11 @@ constructor(
         newlyShown: OverlayKey,
         beingReplaced: OverlayKey? = null,
     ): Boolean {
-        return isInteractionAllowedByFalsing(newlyShown).also {
+        // Moving between the dual shade panels is a horizontal swipe, which the falsing classifiers
+        // for those panels always reject, and the first panel already went through falsing.
+        val isMovingBetweenShadePanels =
+            beingReplaced in DualShadeOverlays && newlyShown in DualShadeOverlays
+        return (isMovingBetweenShadePanels || isInteractionAllowedByFalsing(newlyShown)).also {
             // An overlay change is guaranteed; log it.
             logger.logOverlayChangeRequested(
                 from = beingReplaced,
@@ -428,3 +432,6 @@ constructor(
         ): SceneContainerViewModel
     }
 }
+
+/** The overlays of the dual shade, between which a horizontal swipe can move. */
+private val DualShadeOverlays = setOf(Overlays.NotificationsShade, Overlays.QuickSettingsShade)
