@@ -21,6 +21,7 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay.HideCurrentOverlays
 import com.android.systemui.scene.shared.model.Overlays
@@ -51,7 +52,7 @@ constructor(private val shadeModeInteractor: ShadeModeInteractor) : UserActionsV
                     put(Swipe.Up, hideNotificationsShade)
                     put(Back, hideNotificationsShade)
                     // Quick settings sit on the end side: swipe towards the start to get them.
-                    put(Swipe.Start, openQuickSettingsShade)
+                    put(Swipe.Start, ReplaceByOverlay(Overlays.QuickSettingsShade))
                     if (!isFullWidthShade) {
                         put(Swipe.Down(fromSource = EndHalf), openQuickSettingsShade)
                     }

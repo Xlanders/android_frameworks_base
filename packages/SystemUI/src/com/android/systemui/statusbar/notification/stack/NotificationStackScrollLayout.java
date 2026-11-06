@@ -206,6 +206,8 @@ public class NotificationStackScrollLayout
     private int mTouchSlop;
     /** Whether the current gesture started on a notification, which handles horizontal swipes. */
     private boolean mDownOnNotificationRow;
+    private float mHandOffDownX;
+    private float mHandOffDownY;
     private float mSlopMultiplier;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
@@ -4087,6 +4089,7 @@ public class NotificationStackScrollLayout
             if (action == ACTION_DOWN && !isTouchInGuts) {
                 mController.closeControlsDueToOutsideTouch();
             }
+            maybeHandOffHorizontalDrag(ev);
             if (shouldDispatchToSceneContainer()) {
                 // Dispatch TouchEvent to the scene framework
                 boolean isUpOrCancel = action == ACTION_UP || action == ACTION_CANCEL;
@@ -4120,6 +4123,29 @@ public class NotificationStackScrollLayout
         }
         // dispatch all touches to TouchHandlers, so they can decide whether they want to handle it.
         return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
+    }
+
+    /**
+     * Horizontal drags on notifications dismiss them. Elsewhere (section headers, footer, gaps),
+     * let the scene container use them, for example to move to the quick settings panel in dual
+     * shade. This can't live in the scroll handling, which is off when the list fits the screen.
+     */
+    private void maybeHandOffHorizontalDrag(MotionEvent ev) {
+        int action = ev.getActionMasked();
+        if (action == ACTION_DOWN) {
+            mHandOffDownX = ev.getX();
+            mHandOffDownY = ev.getY();
+            ExpandableView child = getChildAtPosition(ev.getX(), ev.getY(),
+                    false /* requireMinHeight */, false /* ignoreDecors */, true /* ignoreWidth */);
+            mDownOnNotificationRow = child instanceof ExpandableNotificationRow;
+        } else if (action == MotionEvent.ACTION_MOVE && !mIsBeingDragged && !mDownOnNotificationRow
+                && !mSwipeHelper.isSwiping()) {
+            float xDiff = Math.abs(ev.getX() - mHandOffDownX);
+            float yDiff = Math.abs(ev.getY() - mHandOffDownY);
+            if (xDiff > getTouchSlop(ev) && xDiff > yDiff) {
+                setIsBeingDragged(true);
+            }
+        }
     }
 
     void dispatchDownEventToScroller(MotionEvent ev) {
@@ -4569,12 +4595,6 @@ public class NotificationStackScrollLayout
                     mDownX = x;
                     initVelocityTrackerIfNotExists();
                     mVelocityTracker.addMovement(ev);
-                } else if (SceneContainerFlag.isEnabled() && !mDownOnNotificationRow
-                        && xDiff > getTouchSlop(ev) && xDiff > yDiff) {
-                    // Horizontal drags on notifications dismiss them. Elsewhere (section
-                    // headers, footer, gaps), let the scene container use them, for example to
-                    // move to the quick settings panel in dual shade.
-                    setIsBeingDragged(true);
                 }
                 break;
             }
@@ -4585,17 +4605,9 @@ public class NotificationStackScrollLayout
                 final ExpandableView childAtTouchPos = getChildAtPosition(
                         ev.getX(), y, false /* requireMinHeight */,
                         false /* ignoreDecors */, true /* ignoreWidth */);
-                mDownOnNotificationRow = childAtTouchPos instanceof ExpandableNotificationRow;
                 if (childAtTouchPos == null) {
                     setIsBeingDragged(false);
                     recycleVelocityTracker();
-                    if (SceneContainerFlag.isEnabled()) {
-                        // Track the gesture anyway, so that a horizontal drag in the gaps
-                        // between notifications can be handed over to the scene container.
-                        mLastMotionY = y;
-                        mDownX = (int) ev.getX();
-                        mActivePointerId = ev.getPointerId(0);
-                    }
                     break;
                 }
 

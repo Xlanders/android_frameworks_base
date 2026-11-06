@@ -21,6 +21,7 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay.HideCurrentOverlays
 import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
@@ -61,7 +62,7 @@ constructor(
                         put(Back, hideQuickSettings)
                         put(Swipe.Up, hideQuickSettings)
                         // Notifications sit on the start side: swipe towards the end to get them.
-                        put(Swipe.End, openNotificationsShade)
+                        put(Swipe.End, ReplaceByOverlay(Overlays.NotificationsShade))
                     }
                     put(Swipe.Down(fromSource = TopEdgeStartHalf), openNotificationsShade)
                     if (!isFullWidthShade) {
