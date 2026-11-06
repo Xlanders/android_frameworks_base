@@ -30,11 +30,9 @@ import com.android.systemui.development.ui.viewmodel.BuildNumberViewModel
 import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
-import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.domain.interactor.QSPanelAppearanceInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.ToolbarViewModel
 import com.android.systemui.qs.tiles.dialog.AudioDetailsViewModel
-import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
@@ -139,12 +137,8 @@ constructor(
         }
     }
 
-    private val showVolumeSlider =
-        QsDetailedView.isEnabled &&
-            shadeContext.resources.getBoolean(R.bool.config_enableDesktopAudioTileDetailsView)
-
     val volumeSliderViewModel =
-        if (showVolumeSlider && volumeSliderCoroutineScope != null)
+        if (volumeSliderCoroutineScope != null)
             audioStreamSliderViewModelFactory.create(
                 AudioStreamSliderViewModel.FactoryAudioStreamWrapper(
                     SliderType.Stream(AudioStream(AudioManager.STREAM_MUSIC)).stream

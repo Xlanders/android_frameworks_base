@@ -388,26 +388,32 @@ private fun ContentScope.QuickSettingsLayout(
 
             val brightnessSettings = rememberQsBrightnessSettings()
             val sliders: @Composable () -> Unit = {
-                Box(
-                    Modifier.systemGestureExclusionInShade(
-                        enabled = { layoutState.transitionState is TransitionState.Idle }
-                    )
-                ) {
-                    BrightnessSliderContainer(
-                        viewModel = qsContainerViewModel.brightnessSliderViewModel,
-                        containerColors =
-                            ContainerColors(
-                                idleColor = Color.Transparent,
-                                mirrorColor = OverlayShade.Colors.panelBackground(isTransparencyEnabled),
-                            ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                if (brightnessSettings.showSlider != 0) {
+                    Box(
+                        Modifier.systemGestureExclusionInShade(
+                            enabled = { layoutState.transitionState is TransitionState.Idle }
+                        )
+                    ) {
+                        BrightnessSliderContainer(
+                            viewModel = qsContainerViewModel.brightnessSliderViewModel,
+                            containerColors =
+                                ContainerColors(
+                                    idleColor = Color.Transparent,
+                                    mirrorColor =
+                                        OverlayShade.Colors.panelBackground(isTransparencyEnabled),
+                                ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
 
                 if (volumeSliderViewModel != null) {
-                    val volumeSliderState by volumeSliderViewModel.slider.collectAsStateWithLifecycle()
+                    val volumeSliderState by
+                        volumeSliderViewModel.slider.collectAsStateWithLifecycle()
 
-                    VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+                    if (brightnessSettings.showSlider != 0) {
+                        VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+                    }
                     Box(
                         Modifier.systemGestureExclusionInShade(
                             enabled = { layoutState.transitionState is TransitionState.Idle }
@@ -427,35 +433,41 @@ private fun ContentScope.QuickSettingsLayout(
                                 onValueChangeFinished = {
                                     volumeSliderViewModel.onValueChangeFinished()
                                 },
-                                onIconTapped = { volumeSliderViewModel.toggleMuted(volumeSliderState) },
+                                onIconTapped = {
+                                    volumeSliderViewModel.toggleMuted(volumeSliderState)
+                                },
                                 sliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
                                 hapticsViewModelFactory =
                                     volumeSliderViewModel.getSliderHapticsViewModelFactory(),
                             )
-                            IconButton(
-                                colors =
-                                    IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                                    ),
-                                onClick = {
-                                    qsContainerViewModel.detailsViewModel.onVolumeSettingsButtonClicked(
-                                        audioDetailsViewModelFactory.create()
+                            // This button opens the tile details, which need this flag.
+                            if (QsDetailedView.isEnabled) {
+                                IconButton(
+                                    colors =
+                                        IconButtonDefaults.iconButtonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                                        ),
+                                    onClick = {
+                                        qsContainerViewModel.detailsViewModel
+                                            .onVolumeSettingsButtonClicked(
+                                                audioDetailsViewModelFactory.create()
+                                            )
+                                    },
+                                ) {
+                                    Icon(
+                                        painterResource(R.drawable.horizontal_ellipsis),
+                                        // TODO(b/378513663): Update the placeholder content
+                                        //  description
+                                        contentDescription = "Volume settings",
                                     )
-                                },
-                            ) {
-                                Icon(
-                                    painterResource(R.drawable.horizontal_ellipsis),
-                                    // TODO(b/378513663): Update the placeholder content description
-                                    contentDescription = "Volume settings",
-                                )
+                                }
                             }
                         }
                     }
                 }
-
             }
-            val showSliders = brightnessSettings.showSlider != 0
+            val showSliders = brightnessSettings.showSlider != 0 || volumeSliderViewModel != null
 
             if (showSliders && brightnessSettings.sliderAtTop) {
                 sliders()
