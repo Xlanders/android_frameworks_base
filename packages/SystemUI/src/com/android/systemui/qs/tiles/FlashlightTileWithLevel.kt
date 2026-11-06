@@ -107,6 +107,9 @@ constructor(
 
     override fun getTileLabel() = mContext.getString(config.uiConfig.labelRes)
 
+    // The lock screen shortcut also turns it on without unlocking.
+    override fun requiresUnlockWhenLocked() = false
+
     override fun handleClick(expandable: Expandable?) {
         handleAction(QSTileUserAction.Click(expandable))
     }

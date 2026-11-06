@@ -32,6 +32,7 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -148,6 +149,21 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * @param expandable {@link Expandable} that was clicked.
      */
     protected abstract void handleClick(@Nullable Expandable expandable);
+
+    /** Whether using this tile on a locked device first asks for the device credential. */
+    protected boolean requiresUnlockWhenLocked() {
+        return true;
+    }
+
+    private void runAfterUnlockIfNeeded(Runnable action) {
+        KeyguardManager keyguardManager = mContext.getSystemService(KeyguardManager.class);
+        if (requiresUnlockWhenLocked() && keyguardManager != null
+                && keyguardManager.isDeviceLocked()) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(action);
+        } else {
+            action.run();
+        }
+    }
 
     /**
      * Update state of the tile based on device state
@@ -302,7 +318,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state,
                 eventId);
         if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-            mHandler.obtainMessage(H.CLICK, eventId, 0, expandable).sendToTarget();
+            runAfterUnlockIfNeeded(
+                    () -> mHandler.obtainMessage(H.CLICK, eventId, 0, expandable).sendToTarget());
         }
     }
 
@@ -317,7 +334,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
                 mState.state, eventId);
         if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-            mHandler.obtainMessage(H.SECONDARY_CLICK, eventId, 0, expandable).sendToTarget();
+            runAfterUnlockIfNeeded(
+                    () -> mHandler.obtainMessage(H.SECONDARY_CLICK, eventId, 0, expandable)
+                            .sendToTarget());
         }
     }
 

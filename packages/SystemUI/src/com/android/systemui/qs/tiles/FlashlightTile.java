@@ -99,6 +99,12 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
+    protected boolean requiresUnlockWhenLocked() {
+        // The lock screen shortcut also turns it on without unlocking.
+        return false;
+    }
+
+    @Override
     protected void handleClick(@Nullable Expandable expandable) {
         if (ActivityManager.isUserAMonkey()) {
             return;
