@@ -310,7 +310,7 @@ fun ContentScope.ConstrainedNotificationStack(
             modifier
                 .onSizeChanged { viewModel.onConstrainedAvailableSpaceChanged(it.height) }
                 .onGloballyPositioned {
-                    if (shouldUseLockscreenStackBounds(layoutState.transitionState)) {
+                    if (viewModel.shouldUseLockscreenStackBounds()) {
                         stackScrollView.updateDrawBounds(it.rawBoundsInWindow())
                     }
                 }
@@ -318,7 +318,7 @@ fun ContentScope.ConstrainedNotificationStack(
         NotificationPlaceholder(
             stackScrollView = stackScrollView,
             viewModel = viewModel,
-            useStackBounds = { shouldUseLockscreenStackBounds(layoutState.transitionState) },
+            useStackBounds = { viewModel.shouldUseLockscreenStackBounds() },
             modifier =
                 Modifier.fillMaxWidth()
                     .notificationStackHeight(view = stackScrollView, constrainToMaxHeight = true)
@@ -331,12 +331,7 @@ fun ContentScope.ConstrainedNotificationStack(
         HeadsUpNotificationSpace(
             stackScrollView = stackScrollView,
             viewModel = viewModel,
-            useHunBounds = {
-                shouldUseLockscreenHunBounds(
-                    layoutState.transitionState,
-                    viewModel.quickSettingsShadeContentKey,
-                )
-            },
+            useHunBounds = { viewModel.shouldUseLockscreenHunBounds() },
             modifier = Modifier.align(Alignment.TopCenter),
         )
     }

@@ -85,6 +85,35 @@ constructor(
         )
 
     /** The content key to use for the quick settings shade. */
+    /**
+     * Whether the lock screen stack placeholder should feed its bounds to the stack. This reads the
+     * root scene state: the placeholder is inside a nested SceneTransitionLayout, whose own
+     * transition state only knows about its nested scenes, so it never reports the lock screen.
+     */
+    fun shouldUseLockscreenStackBounds(): Boolean {
+        return when (val state = sceneInteractor.transitionState.value) {
+            is ObservableTransitionState.Idle -> state.isOnLockscreen()
+            is ObservableTransitionState.Transition ->
+                // Keep using the lockscreen stack bounds when there is no placeholder on the next
+                // content
+                state.fromContent == Scenes.Lockscreen && state.toContent != Scenes.Shade ||
+                    state.isTransitioning(from = Overlays.Bouncer, to = Scenes.Lockscreen)
+        }
+    }
+
+    /** Same as [shouldUseLockscreenStackBounds], for the heads-up notification placeholder. */
+    fun shouldUseLockscreenHunBounds(): Boolean {
+        return when (val state = sceneInteractor.transitionState.value) {
+            is ObservableTransitionState.Idle -> state.isOnLockscreen()
+            is ObservableTransitionState.Transition ->
+                state.isTransitioning(from = quickSettingsShadeContentKey, to = Scenes.Lockscreen)
+        }
+    }
+
+    private fun ObservableTransitionState.Idle.isOnLockscreen(): Boolean {
+        return currentScene == Scenes.Lockscreen && currentOverlays.isEmpty()
+    }
+
     val quickSettingsShadeContentKey: ContentKey by
         hydrator.hydratedStateOf(
             traceName = "quickSettingsShadeContentKey",
