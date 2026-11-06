@@ -16,7 +16,12 @@
 
 package com.android.systemui.keyguard.ui.composable.elements
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.icu.text.DateFormat
+import android.icu.text.DisplayContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,17 +30,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementContentScope
 import com.android.systemui.customization.clocks.R as clocksR
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.plugins.keyguard.VRectF
 import com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenElement
 import com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenElementKeys
@@ -46,6 +59,7 @@ import com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenSc
 import com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenScope.Companion.LockscreenElement
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
+import java.util.Date
 import javax.inject.Inject
 import kotlin.collections.List
 
@@ -55,6 +69,7 @@ class ClockRegionElementProvider
 constructor(
     @ShadeDisplayAware private val context: Context,
     private val keyguardClockViewModel: KeyguardClockViewModel,
+    private val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
 ) : LockscreenElementProvider {
     override val elements: List<LockscreenElement> by lazy {
         listOf(SmallClockRegionElement(), LargeClockRegionElement())
@@ -108,6 +123,10 @@ constructor(
                         Smartspace.DWA.SmallClock.Row,
                         Modifier.padding(horizontal = xPadding),
                     )
+                }
+
+                if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) {
+                    LockscreenDate(Modifier.padding(horizontal = xPadding))
                 }
 
                 LockscreenElement(Smartspace.Cards)
@@ -181,8 +200,51 @@ constructor(
                     if (shouldDateWeatherBeBelowLargeClock) {
                         LockscreenElement(Smartspace.DWA.LargeClock.Below)
                     }
+                    if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) {
+                        LockscreenDate()
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * The date under the clock when no smartspace plugin provides it, which is the case on builds
+ * without Google's plugin. The legacy keyguard shows it through KeyguardSliceView instead.
+ */
+@Composable
+private fun LockscreenDate(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var date by remember { mutableStateOf(formatLockscreenDate(context)) }
+
+    DisposableEffect(context) {
+        val receiver =
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    date = formatLockscreenDate(context)
+                }
+            }
+        val filter =
+            IntentFilter().apply {
+                addAction(Intent.ACTION_TIME_TICK)
+                addAction(Intent.ACTION_TIME_CHANGED)
+                addAction(Intent.ACTION_TIMEZONE_CHANGED)
+                addAction(Intent.ACTION_DATE_CHANGED)
+            }
+        context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+
+    Text(text = date, color = Color.White, fontSize = 18.sp, modifier = modifier)
+}
+
+private fun formatLockscreenDate(context: Context): String {
+    val format =
+        DateFormat.getInstanceForSkeleton(
+            context.getString(R.string.system_ui_aod_date_pattern),
+            context.resources.configuration.locales[0],
+        )
+    format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE)
+    return format.format(Date())
 }
