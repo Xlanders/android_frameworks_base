@@ -49,7 +49,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.ui.composable.ChipHighlightModel
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.OverlayShadeHeader
 import com.android.systemui.shade.ui.composable.isFullWidthShade
@@ -123,9 +122,11 @@ constructor(
                         }
                     OverlayShadeHeader(
                         viewModel = headerViewModel,
-                        notificationsHighlight = ChipHighlightModel.Strong,
+                        // Same chips as in the quick settings panel, so that they don't change
+                        // when moving between the two panels.
+                        notificationsHighlight = headerViewModel.inactiveChipHighlight,
                         quickSettingsHighlight = headerViewModel.inactiveChipHighlight,
-                        showClock = !isFullWidth,
+                        showClock = true,
                         modifier = Modifier.element(NotificationsShade.Elements.StatusBar),
                     )
                 }

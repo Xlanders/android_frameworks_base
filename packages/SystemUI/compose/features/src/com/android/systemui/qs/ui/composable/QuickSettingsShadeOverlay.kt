@@ -102,7 +102,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.ui.composable.ChipHighlightModel
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.OverlayShadeHeader
 import com.android.systemui.shade.ui.composable.QuickSettingsOverlayHeader
@@ -215,7 +214,7 @@ constructor(
                         OverlayShadeHeader(
                             viewModel = headerViewModel,
                             notificationsHighlight = headerViewModel.inactiveChipHighlight,
-                            quickSettingsHighlight = ChipHighlightModel.Strong,
+                            quickSettingsHighlight = headerViewModel.inactiveChipHighlight,
                             showClock = true,
                             modifier = Modifier.element(QuickSettingsShade.Elements.StatusBar),
                         )

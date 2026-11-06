@@ -6,6 +6,7 @@
 package com.android.systemui.scene.ui.composable.transitions
 
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.systemui.notifications.ui.composable.NotificationsShade
@@ -15,7 +16,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Moves between the dual shade panels like pages: notifications leave towards the start edge
  * while quick settings come in from the end edge. Played in reverse for the other direction. The
- * shared scrim stays in place.
+ * shared scrim and the status bar chips stay in place.
  */
 fun TransitionBuilder.notificationsShadeToQuickSettingsShadeTransition(
     durationScale: Double = 1.0
@@ -25,8 +26,14 @@ fun TransitionBuilder.notificationsShadeToQuickSettingsShadeTransition(
     translate(NotificationsShade.Elements.Panel, Edge.Start)
     translate(QuickSettingsShade.Elements.Panel, Edge.End)
 
-    fractionRange(end = .5f) { fade(NotificationsShade.Elements.StatusBar) }
-    fractionRange(start = .5f) { fade(QuickSettingsShade.Elements.StatusBar) }
+    // Both panels show the same status bar chips: keep them still instead of following the panels,
+    // and only swap them at the very end so that they don't flicker.
+    translate(NotificationsShade.Elements.StatusBar, x = 0.dp)
+    translate(QuickSettingsShade.Elements.StatusBar, x = 0.dp)
+    fractionRange(start = .99f) {
+        fade(NotificationsShade.Elements.StatusBar)
+        fade(QuickSettingsShade.Elements.StatusBar)
+    }
 }
 
 private val DefaultDuration = 350.milliseconds
