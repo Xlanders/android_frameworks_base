@@ -85,6 +85,7 @@ import com.android.systemui.media.remedia.ui.compose.Media
 import com.android.systemui.media.remedia.ui.compose.MediaPresentationStyle
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.notifications.ui.composable.headsUpTopInset
+import com.android.systemui.qs.composefragment.rememberQsBrightnessSettings
 import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.compose.EditMode
@@ -386,73 +387,81 @@ private fun ContentScope.QuickSettingsLayout(
                 VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
             }
 
-            Box(
-                Modifier.systemGestureExclusionInShade(
-                    enabled = { layoutState.transitionState is TransitionState.Idle }
-                )
-            ) {
-                BrightnessSliderContainer(
-                    viewModel = qsContainerViewModel.brightnessSliderViewModel,
-                    containerColors =
-                        ContainerColors(
-                            idleColor = Color.Transparent,
-                            mirrorColor = OverlayShade.Colors.panelBackground(isTransparencyEnabled),
-                        ),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            if (volumeSliderViewModel != null) {
-                val volumeSliderState by volumeSliderViewModel.slider.collectAsStateWithLifecycle()
-
-                VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+            val brightnessSettings = rememberQsBrightnessSettings()
+            val sliders: @Composable () -> Unit = {
                 Box(
                     Modifier.systemGestureExclusionInShade(
                         enabled = { layoutState.transitionState is TransitionState.Idle }
                     )
                 ) {
-                    Row(
+                    BrightnessSliderContainer(
+                        viewModel = qsContainerViewModel.brightnessSliderViewModel,
+                        containerColors =
+                            ContainerColors(
+                                idleColor = Color.Transparent,
+                                mirrorColor = OverlayShade.Colors.panelBackground(isTransparencyEnabled),
+                            ),
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        VolumeSlider(
-                            modifier = Modifier.weight(1f),
-                            showLabel = false,
-                            state = volumeSliderState,
-                            onValueChange = { newValue: Float ->
-                                volumeSliderViewModel.onValueChanged(volumeSliderState, newValue)
-                            },
-                            onValueChangeFinished = {
-                                volumeSliderViewModel.onValueChangeFinished()
-                            },
-                            onIconTapped = { volumeSliderViewModel.toggleMuted(volumeSliderState) },
-                            sliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
-                            hapticsViewModelFactory =
-                                volumeSliderViewModel.getSliderHapticsViewModelFactory(),
+                    )
+                }
+
+                if (volumeSliderViewModel != null) {
+                    val volumeSliderState by volumeSliderViewModel.slider.collectAsStateWithLifecycle()
+
+                    VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+                    Box(
+                        Modifier.systemGestureExclusionInShade(
+                            enabled = { layoutState.transitionState is TransitionState.Idle }
                         )
-                        IconButton(
-                            colors =
-                                IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                ),
-                            onClick = {
-                                qsContainerViewModel.detailsViewModel.onVolumeSettingsButtonClicked(
-                                    audioDetailsViewModelFactory.create()
-                                )
-                            },
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                painterResource(R.drawable.horizontal_ellipsis),
-                                // TODO(b/378513663): Update the placeholder content description
-                                contentDescription = "Volume settings",
+                            VolumeSlider(
+                                modifier = Modifier.weight(1f),
+                                showLabel = false,
+                                state = volumeSliderState,
+                                onValueChange = { newValue: Float ->
+                                    volumeSliderViewModel.onValueChanged(volumeSliderState, newValue)
+                                },
+                                onValueChangeFinished = {
+                                    volumeSliderViewModel.onValueChangeFinished()
+                                },
+                                onIconTapped = { volumeSliderViewModel.toggleMuted(volumeSliderState) },
+                                sliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
+                                hapticsViewModelFactory =
+                                    volumeSliderViewModel.getSliderHapticsViewModelFactory(),
                             )
+                            IconButton(
+                                colors =
+                                    IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    ),
+                                onClick = {
+                                    qsContainerViewModel.detailsViewModel.onVolumeSettingsButtonClicked(
+                                        audioDetailsViewModelFactory.create()
+                                    )
+                                },
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.horizontal_ellipsis),
+                                    // TODO(b/378513663): Update the placeholder content description
+                                    contentDescription = "Volume settings",
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+            }
+            val showSliders = brightnessSettings.showSlider != 0
+
+            if (showSliders && brightnessSettings.sliderAtTop) {
+                sliders()
+                VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+            }
 
             GridAnchor()
             TileGrid(
@@ -460,6 +469,11 @@ private fun ContentScope.QuickSettingsLayout(
                 modifier = Modifier.fillMaxWidth(),
                 enableRevealEffect = TileRevealFlag.isEnabled,
             )
+
+            if (showSliders && !brightnessSettings.sliderAtTop) {
+                VerticalSeparator(QuickSettingsShade.Dimensions.Padding)
+                sliders()
+            }
 
             val buildNumberViewModel =
                 rememberViewModel("QuickSettingsShadeOverlay.BuildNumber") {

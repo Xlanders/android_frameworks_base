@@ -1627,7 +1627,7 @@ private fun AlwaysDarkMode(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun rememberQsBrightnessSettings(): QsBrightnessSettings {
+fun rememberQsBrightnessSettings(): QsBrightnessSettings {
     val context = LocalContext.current
     val cr = remember { context.contentResolver }
 
@@ -1682,7 +1682,7 @@ private fun rememberQsBrightnessSettings(): QsBrightnessSettings {
     return state
 }
 
-private data class QsBrightnessSettings(
+data class QsBrightnessSettings(
     val sliderAtTop: Boolean,
     val showSlider: Int,
 )
