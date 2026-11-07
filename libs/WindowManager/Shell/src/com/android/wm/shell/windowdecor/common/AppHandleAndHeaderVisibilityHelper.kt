@@ -53,6 +53,12 @@ class AppHandleAndHeaderVisibilityHelper(
         // return false if display is null
         val display = displayController.getDisplay(taskInfo.displayId) ?: return false
 
+        // A freeform window needs its header to be moved, resized or made fullscreen, including on
+        // a display that can't host desktops, where freeform is enabled on its own.
+        if (taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            return true
+        }
+
         if (!ENABLE_PROJECTED_DISPLAY_DESKTOP_MODE.isTrue) {
             return allowedForTask(taskInfo, display)
         }
