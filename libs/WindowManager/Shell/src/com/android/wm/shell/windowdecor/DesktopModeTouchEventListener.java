@@ -560,8 +560,8 @@ public class DesktopModeTouchEventListener
 
                 if (DesktopExperienceFlags
                         .ENABLE_BLOCK_NON_DESKTOP_DISPLAY_WINDOW_DRAG_BUGFIX.isTrue()) {
-                    final boolean inDesktopModeDisplay = mShellDesktopState
-                            .isEligibleWindowDropTarget(e.getDisplayId());
+                    final boolean inDesktopModeDisplay =
+                            canDropOnDisplay(taskInfo, e.getDisplayId());
                     // TODO: b/418651425 - Use a more specific pointer icon when available.
                     final IBinder inputToken = v.getViewRootImpl() != null
                             ? v.getViewRootImpl().getInputToken() : null;
@@ -652,8 +652,7 @@ public class DesktopModeTouchEventListener
                             PointerIcon.TYPE_ARROW);
                     // If the cursor ends on a non-desktop-mode display, revert the window
                     // to its initial bounds prior to the drag starting.
-                    if (!mShellDesktopState
-                            .isEligibleWindowDropTarget(e.getDisplayId())) {
+                    if (!canDropOnDisplay(taskInfo, e.getDisplayId())) {
                         newTaskBounds.set(mOnDragStartInitialBounds);
                         debugLogD(
                                 "handleFreeformMotionEvent(%s) action=%s pointer in non-desktop"
@@ -780,6 +779,15 @@ public class DesktopModeTouchEventListener
                 ToggleTaskSizeInteraction.AmbiguousSource.DOUBLE_TAP,
                 getInputMethod(mMotionEvent));
         return true;
+    }
+
+    /**
+     * A freeform window can always be moved within its own display. The eligibility check only
+     * stops it from being dropped on another display that can't host desktop windows.
+     */
+    private boolean canDropOnDisplay(ActivityManager.RunningTaskInfo taskInfo, int displayId) {
+        return displayId == taskInfo.displayId
+                || mShellDesktopState.isEligibleWindowDropTarget(displayId);
     }
 
     private DesktopModeEventLogger.Companion.InputMethod getInputMethod(MotionEvent ev) {
