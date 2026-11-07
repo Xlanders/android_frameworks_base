@@ -1777,6 +1777,17 @@ class DesktopTasksController(
         val displayId = taskInfo.displayId
         val userId = taskInfo.userId
         val repository = userRepositories.getProfile(userId)
+        // A freeform window on a display that can't host desktops has no desk to be minimized
+        // into, so send it to the back instead, like going home.
+        if (
+            repository.getDeskIdForTask(taskId) == null &&
+                !desktopState.isDesktopModeSupportedOnDisplay(displayId)
+        ) {
+            logD("minimizeTask: no desk on display %d, moving task %d to back", displayId, taskId)
+            wct.reorder(taskInfo.token, /* onTop= */ false)
+            transitions.startTransition(TRANSIT_TO_BACK, wct, /* handler= */ null)
+            return
+        }
         val deskId =
             repository.getDeskIdForTask(taskId)
                 ?: if (DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_BACKEND.isTrue) {
