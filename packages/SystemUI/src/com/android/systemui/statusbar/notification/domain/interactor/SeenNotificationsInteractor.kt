@@ -147,7 +147,9 @@ constructor(
                 .map {
                     secureSettings.getIntForUser(
                         name = Settings.Secure.LOCK_SCREEN_NOTIFICATION_MINIMALISM,
-                        default = 1,
+                        // Full notification cards on the lock screen unless compact view is
+                        // turned on in Settings, which uses the same default.
+                        default = 0,
                         userHandle = UserHandle.USER_CURRENT,
                     ) == 1
                 }
