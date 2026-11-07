@@ -7,4 +7,11 @@
     <!-- Expressive collapsing toolbar: expanded header fills about a third of the screen so that
          the first preferences start within thumb reach. -->
     <dimen name="settingslib_expressive_toolbar_layout_height">300dp</dimen>
+    <!-- The back and search buttons sit at the bottom of the expanded header, within thumb
+         reach, so the expanded title goes above them: toolbar height (56dp) plus 16dp. -->
+    <dimen name="settingslib_expressive_expanded_title_margin_bottom">72dp</dimen>
+    <!-- CollapsingToolbarLayout starts the expanded title bounds at the toolbar's top, which is
+         now at the bottom of the header. Pull the top above the header, the title is drawn at the
+         bottom of its bounds anyway. -->
+    <dimen name="settingslib_expressive_expanded_title_margin_top">-400dp</dimen>
 </resources>

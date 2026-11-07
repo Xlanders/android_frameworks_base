@@ -33,6 +33,8 @@
     </style>
     <style name="SettingsLibCollapsingToolbarLayoutStyle.Expressive">
         <item name="contentScrim">@color/settingslib_materialColorSurfaceContainer</item>
+        <item name="expandedTitleMarginTop">@dimen/settingslib_expressive_expanded_title_margin_top</item>
+        <item name="expandedTitleMarginBottom">@dimen/settingslib_expressive_expanded_title_margin_bottom</item>
     </style>
 
     <style name="SettingsLibCollapsingToolbarTitle.Collapsed" parent="@style/TextAppearance.SettingsLib.TitleLarge.Emphasized">

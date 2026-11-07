@@ -43,6 +43,7 @@
                 android:id="@+id/support_action_bar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="bottom"
                 android:layout_marginStart="@dimen/settingslib_expressive_space_extrasmall4"
                 android:theme="?android:attr/actionBarTheme"
                 android:transitionName="shared_element_view"
