@@ -47,17 +47,13 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -353,15 +349,8 @@ private fun TwoRowsTopAppBar(
     // visible when collapsed.
     val heightOffsetLimit = pinnedHeightPx - maxHeightPx.floatValue
     scrollBehavior?.state?.heightOffsetLimit = heightOffsetLimit
-    if (isSpaExpressiveEnabled) {
-        var hasCollapsedInitially by rememberSaveable(heightOffsetLimit) { mutableStateOf(false) }
-        LaunchedEffect(heightOffsetLimit) {
-            if (!hasCollapsedInitially) {
-                scrollBehavior?.collapse()
-                hasCollapsedInitially = true
-            }
-        }
-    }
+    // Pages start expanded, with the back and action buttons under the title within thumb reach,
+    // like the other Settings pages; the expressive design used to collapse them on open.
 
     // Obtain the container Color from the TopAppBarColors using the `collapsedFraction`, as the
     // bottom part of this TwoRowsTopAppBar changes color at the same rate the app bar expands or
@@ -416,32 +405,14 @@ private fun TwoRowsTopAppBar(
                 .semantics { isTraversalGroup = true }
                 .pointerInput(Unit) {}
     ) {
+        // The expanding title row comes first and the pinned row with the back and action buttons
+        // under it, so the buttons sit within thumb reach when expanded. Once collapsed, the title
+        // row has no height left and the pinned row ends up at the top.
         Column {
             TopAppBarLayout(
                 modifier =
                     Modifier.windowInsetsPadding(windowInsets)
                         // clip after padding so we don't show the title over the inset area
-                        .clipToBounds(),
-                heightPx = pinnedHeightPx,
-                navigationIconContentColor = colors.navigationIconContentColor,
-                titleContentColor = colors.titleContentColor,
-                actionIconContentColor = colors.actionIconContentColor,
-                title = smallTitle,
-                titleTextStyle = smallTitleTextStyle,
-                titleAlpha = topTitleAlpha,
-                titleVerticalArrangement = Arrangement.Center,
-                titleBottomPadding = 0,
-                hideTitleSemantics = hideTopRowSemantics,
-                navigationIcon = navigationIcon,
-                actions = actionsRow,
-            )
-            TopAppBarLayout(
-                modifier =
-                    Modifier
-                        // only apply the horizontal sides of the window insets padding, since the
-                        // top
-                        // padding will always be applied by the layout above
-                        .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Horizontal))
                         .clipToBounds(),
                 heightPx =
                     maxHeightPx.floatValue - pinnedHeightPx +
@@ -475,6 +446,26 @@ private fun TwoRowsTopAppBar(
                 hideTitleSemantics = hideBottomRowSemantics,
                 navigationIcon = {},
                 actions = {},
+            )
+            TopAppBarLayout(
+                modifier =
+                    Modifier
+                        // only apply the horizontal sides of the window insets padding, since the
+                        // top padding is applied by the title row above
+                        .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Horizontal))
+                        .clipToBounds(),
+                heightPx = pinnedHeightPx,
+                navigationIconContentColor = colors.navigationIconContentColor,
+                titleContentColor = colors.titleContentColor,
+                actionIconContentColor = colors.actionIconContentColor,
+                title = smallTitle,
+                titleTextStyle = smallTitleTextStyle,
+                titleAlpha = topTitleAlpha,
+                titleVerticalArrangement = Arrangement.Center,
+                titleBottomPadding = 0,
+                hideTitleSemantics = hideTopRowSemantics,
+                navigationIcon = navigationIcon,
+                actions = actionsRow,
             )
         }
     }
