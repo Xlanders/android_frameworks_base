@@ -55,13 +55,16 @@ class MultiDisplayDragMoveIndicatorController(
             displayController.getDisplayLayout(startDisplayId)?.densityDpi() ?: return
         val transaction = transactionSupplier()
         for (displayId in displayIds) {
+            // The window can always be dropped back on its own display. Without an indicator
+            // there, the dragged window would be invisible until it's released.
             val allowDropToDisplay =
-                if (
-                    DesktopExperienceFlags.ENABLE_BLOCK_NON_DESKTOP_DISPLAY_WINDOW_DRAG_BUGFIX
-                        .isTrue
-                )
-                    shellDesktopState.isEligibleWindowDropTarget(displayId)
-                else shellDesktopState.isDesktopModeSupportedOnDisplay(displayId)
+                displayId == taskInfo.displayId ||
+                    if (
+                        DesktopExperienceFlags.ENABLE_BLOCK_NON_DESKTOP_DISPLAY_WINDOW_DRAG_BUGFIX
+                            .isTrue
+                    )
+                        shellDesktopState.isEligibleWindowDropTarget(displayId)
+                    else shellDesktopState.isDesktopModeSupportedOnDisplay(displayId)
             if (
                 (displayId == startDisplayId &&
                     !DesktopExperienceFlags.ENABLE_WINDOW_DROP_SMOOTH_TRANSITION.isTrue) ||
