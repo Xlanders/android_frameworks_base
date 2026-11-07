@@ -239,10 +239,16 @@ private fun LockscreenDate(modifier: Modifier = Modifier) {
     Text(text = date, color = Color.White, fontSize = 18.sp, modifier = modifier)
 }
 
+/**
+ * Abbreviated weekday, day and full month, e.g. "Sat, Nov 7" becomes "Sat, November 7". The
+ * lock screen has room for the month in full, unlike the always-on display pattern.
+ */
+private const val LOCKSCREEN_DATE_SKELETON = "EEEMMMMd"
+
 private fun formatLockscreenDate(context: Context): String {
     val format =
         DateFormat.getInstanceForSkeleton(
-            context.getString(R.string.system_ui_aod_date_pattern),
+            LOCKSCREEN_DATE_SKELETON,
             context.resources.configuration.locales[0],
         )
     format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE)
