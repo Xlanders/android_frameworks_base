@@ -506,6 +506,23 @@ class AppHeaderViewHolder(
         } else {
             bindDataLegacy(taskInfo, hasGlobalFocus, isCaptionVisible)
         }
+        fitToWindowWidth(taskInfo)
+    }
+
+    /**
+     * Drops the least needed header elements when the window is too narrow for all of them, so
+     * the app icon, menu, maximize and close buttons stay visible instead of being clipped.
+     */
+    private fun fitToWindowWidth(taskInfo: RunningTaskInfo) {
+        val widthDp =
+            taskInfo.configuration.windowConfiguration.bounds.width() /
+                context.resources.displayMetrics.density
+        if (widthDp < HIDE_APP_NAME_WIDTH_DP) {
+            appNameTextView.isVisible = false
+        }
+        if (widthDp < HIDE_MINIMIZE_WIDTH_DP) {
+            minimizeWindowButton.isGone = true
+        }
     }
 
     fun logDisplayCompatRestartButtonEventReported(newTaskInfo: RunningTaskInfo) {
@@ -990,6 +1007,10 @@ class AppHeaderViewHolder(
         private const val LIGHT_THEME_UNFOCUSED_OPACITY = 166 // 65%
         private const val FOCUSED_OPACITY = 255
         private const val CLICK_DELAY: Long = 500
+        // The header needs about 250dp without the app name, and about 200dp without the
+        // minimize button as well.
+        private const val HIDE_APP_NAME_WIDTH_DP = 360
+        private const val HIDE_MINIMIZE_WIDTH_DP = 260
     }
 
     class Factory {
